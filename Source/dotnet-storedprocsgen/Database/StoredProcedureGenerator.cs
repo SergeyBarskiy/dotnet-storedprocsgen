@@ -95,15 +95,15 @@ namespace StoredProcsGenerator.Database
         {
             var result = new StringBuilder();
             var keyColumns = columns.Where(c => c.PrimaryKeyColumnPosition > 0).ToList();
-            var timeStamp = columns.FirstOrDefault(c => c.IsRowVersion);
+            var timeStamp = columns.FirstOrDefault(c => c.IsRowVersion || c.IsCustomRowVersion);
             if (keyColumns.Any() && timeStamp != null)
             {
                 keyColumns.ForEach(key =>
                 {
                     var comma = ",";
-                    result.AppendLine($"@{key.ColumnName} {key.ColumnFullType}{comma}");
+                    result.AppendLine($"\t@{key.ColumnName} {key.ColumnFullType}{comma}");
                 });
-                result.AppendLine($"@{timeStamp.ColumnName} {timeStamp.ColumnFullType}");
+                result.AppendLine($"\t@{timeStamp.ColumnName} {timeStamp.ColumnFullType}");
 
             }
             else if (keyColumns.Any())
@@ -155,8 +155,6 @@ namespace StoredProcsGenerator.Database
             return result.ToString();
         }
 
-
-
         private string GetInsertStatementColumnsList(List<ColumnInfo> columns)
         {
             var result = new StringBuilder();
@@ -184,7 +182,15 @@ namespace StoredProcsGenerator.Database
                 {
                     comma = "";
                 }
-                result.AppendLine($"\t[{column.ColumnName}] = @{column.ColumnName}{comma}");
+                if (column.IsCustomRowVersion)
+                {
+                    result.AppendLine($"\t[{column.ColumnName}] = @{column.ColumnName} + 1{comma}");
+                }
+                else
+                {
+                    result.AppendLine($"\t[{column.ColumnName}] = @{column.ColumnName}{comma}");
+                }
+
             });
             return result.ToString();
         }
@@ -193,7 +199,7 @@ namespace StoredProcsGenerator.Database
         {
             var result = new StringBuilder();
             var keyColumns = columns.Where(c => c.PrimaryKeyColumnPosition > 0).ToList();
-            var timeStamp = columns.FirstOrDefault(c => c.IsRowVersion);
+            var timeStamp = columns.FirstOrDefault(c => c.IsRowVersion || c.IsCustomRowVersion);
             if (keyColumns.Any() && timeStamp != null)
             {
                 keyColumns.ForEach(key =>
@@ -223,7 +229,7 @@ namespace StoredProcsGenerator.Database
         {
             var result = new StringBuilder();
             var identity = columns.FirstOrDefault(c => c.IdentityColumn);
-            var timeStamp = columns.FirstOrDefault(c => c.IsRowVersion);
+            var timeStamp = columns.FirstOrDefault(c => c.IsRowVersion || c.IsCustomRowVersion);
             if (identity != null && timeStamp != null)
             {
                 result.Append($"OUTPUT inserted.[{identity.ColumnName}], inserted.[{timeStamp.ColumnName}]");

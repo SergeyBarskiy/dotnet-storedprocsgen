@@ -20,5 +20,6 @@ namespace StoredProcsGenerator.Database
         public bool Nullable { get; set; }
         public int PrimaryKeyColumnPosition { get; set; }
         public bool IsRowVersion { get; set; }
+        public bool IsCustomRowVersion { get; set; }
     }
 }

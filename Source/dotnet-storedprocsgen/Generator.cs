@@ -53,6 +53,9 @@ namespace StoredProcsGenerator
         [Option("--drop", CommandOptionType.NoValue, Description = "Generate drop statement", ShowInHelpText = true)]
         public bool Drop { get; } = false;
 
+        [Option("-r|--rowVersionColumn", CommandOptionType.SingleValue, Description = "Row version column name", ShowInHelpText = true)]
+        public string RowVersionColumn { get; } = "";
+
         public async Task<int> OnExecute(CommandLineApplication app, IConsole console)
         {
             if (ProcedureKinds.Contains(Kind.ToLower()))
@@ -64,7 +67,7 @@ namespace StoredProcsGenerator
                 {
                     await connection.OpenAsync();
                     Console.WriteLine("Connected...");
-                    var columns = await columnInfoProvider.GetColumns(connection, Table);
+                    var columns = await columnInfoProvider.GetColumns(connection, Table, RowVersionColumn);
                     Console.WriteLine($"Total number of columns is {columns.Count}");
                     var kind = (StoredProcedureKind)Enum.Parse(typeof(StoredProcedureKind), Kind, true);
                     var text = new StringBuilder();
