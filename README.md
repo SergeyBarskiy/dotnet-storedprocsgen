@@ -1,5 +1,6 @@
-# dotnet-storedprocsgen
-Dotnet command line tool for stored procedures generation. 
+# Stored procedures generator for SQL Server written in .NET Core tools
+You can learn more about global tools here: 
+https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools
 
 Usage: dotnet storedprocsgen [options]
 
