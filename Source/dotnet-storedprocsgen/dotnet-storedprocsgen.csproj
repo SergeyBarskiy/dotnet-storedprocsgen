@@ -11,6 +11,15 @@
     <Description>This is a dotnet command line tool that generates stored procedures</Description>
     <RepositoryType>git</RepositoryType>
     <Copyright>@Sergey Barskiy, 2018</Copyright>
+    <PackageProjectUrl>https://github.com/SergeyBarskiy/dotnet-storedprocsgen</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/SergeyBarskiy/dotnet-storedprocsgen/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageIconUrl></PackageIconUrl>
+    <RepositoryUrl>https://github.com/SergeyBarskiy/dotnet-storedprocsgen</RepositoryUrl>
+    <PackageTags>.net core, tool</PackageTags>
+    <PackageReleaseNotes>Initital release</PackageReleaseNotes>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <FileVersion>1.0.0.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
