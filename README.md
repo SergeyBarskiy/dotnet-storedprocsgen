@@ -24,4 +24,4 @@ This tool generates stored procedures.  Use -s to specify server name and -d for
  SSPI will be used.
 
 To install run 
-dotnet tool install -g storedprocsgen
+# dotnet tool install dotnet-storedprocsgen -g
