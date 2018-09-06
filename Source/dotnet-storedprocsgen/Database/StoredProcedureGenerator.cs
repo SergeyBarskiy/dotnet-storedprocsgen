@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -27,7 +28,7 @@ namespace StoredProcsGenerator.Database
             return $"{prefix}_{tableName}_{procedureKind}"; ;
         }
 
-        public string GetBody(StoredProcedureKind procedureKind, List<ColumnInfo> columns)
+        public string GetBody(StoredProcedureKind procedureKind, List<ColumnInfo> columns, string sortByColumns, string searchColumns)
         {
             var result = new StringBuilder();
             result.AppendLine("(");
@@ -42,6 +43,10 @@ namespace StoredProcsGenerator.Database
             else if (procedureKind == StoredProcedureKind.Delete)
             {
                 result.Append(GetDeleteStatementParameters(columns));
+            }
+            else if (procedureKind == StoredProcedureKind.Search)
+            {
+                result.Append(GetSearchParameters());
             }
             result.AppendLine(")");
             result.AppendLine("AS");
@@ -72,6 +77,101 @@ namespace StoredProcsGenerator.Database
                 result.AppendLine("WHERE");
                 result.AppendLine(GetUpdateStatementWhere(columns));
             }
+            else if (procedureKind == StoredProcedureKind.Search)
+            {
+                result.AppendLine(GetSearchRawData(columns, sortByColumns, searchColumns));
+                result.AppendLine(GetSearchFinalSelect());
+            }
+            return result.ToString();
+        }
+
+        private string GetSearchRawData(List<ColumnInfo> columns, string sortByColumns, string searchColumns)
+        {
+            var sorts = sortByColumns.Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var searches = searchColumns.Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var selectable = sorts.Union(searches).Distinct().ToList();
+            var firstColumn = columns.First();
+
+            var finalOrderBy = "";
+            sorts.ForEach(s =>
+            {
+                finalOrderBy = finalOrderBy + $"[{s}]";
+                if (sorts.IndexOf(s) != sorts.Count - 1)
+                {
+                    finalOrderBy = finalOrderBy + ", ";
+                }
+            });
+
+            var finalOrderByDescending = "";
+            sorts.ForEach(s =>
+            {
+                finalOrderByDescending = finalOrderByDescending + $"[{s}] DESC";
+                if (sorts.IndexOf(s) != sorts.Count - 1)
+                {
+                    finalOrderByDescending = finalOrderByDescending + ", ";
+                }
+            });
+
+            var finalSearch = "";
+            searches.ForEach(s =>
+            {
+                finalSearch = finalSearch + $"([{s}] LIKE '%'+ @SEARCH +'%')";
+                if (searches.IndexOf(s) != searches.Count - 1)
+                {
+                    finalSearch = finalSearch + " OR ";
+                }
+            });
+            columns.ForEach(column =>
+            {
+                if (column.PrimaryKeyColumnPosition > 0 && !selectable.Contains(column.ColumnName))
+                {
+                    selectable.Add(column.ColumnName);
+                }
+                if ((column.IsRowVersion || column.IsCustomRowVersion) && !selectable.Contains(column.ColumnName))
+                {
+                    selectable.Add(column.ColumnName);
+                }
+            });
+            var result = new StringBuilder();
+            result.AppendLine("WITH RAW_DATA AS (");
+            result.AppendLine("\tSELECT");
+            selectable.ForEach(column =>
+            {
+                result.AppendLine($"\t\t[{column}],");
+            });
+            result.AppendLine("\t\tCASE @IS_ASCENDING WHEN 1 THEN");
+            result.AppendLine($"\t\t\tROW_NUMBER() OVER(ORDER BY {finalOrderBy})");
+            result.AppendLine("\t\tELSE");
+            result.AppendLine($"\t\t\tROW_NUMBER() OVER(ORDER BY {finalOrderByDescending})");
+            result.AppendLine("\t\tEND AS RowNumber,");
+            result.AppendLine("\t\tCOUNT(1) OVER() AS TotalRows");
+            result.AppendLine($"\tFROM [{firstColumn.SchemaName}].[{firstColumn.TableName}]");
+
+            result.AppendLine($"\tWHERE {finalSearch}");
+            result.AppendLine(")");
+            return result.ToString();
+        }
+
+        private string GetSearchParameters()
+        {
+            var result = new StringBuilder();
+            result.AppendLine("\t@SEARCH AS NVARCHAR(10) = '',");
+            result.AppendLine("\t@PAGE_NUMBER AS INT = 1,");
+            result.AppendLine("\t@PAGE_SIZE AS INT = 10,");
+            result.AppendLine("\t@IS_ASCENDING AS BIT = 1");
+            return result.ToString();
+        }
+
+        private string GetSearchFinalSelect()
+        {
+            var result = new StringBuilder();
+            result.AppendLine("SELECT * ");
+            result.AppendLine("FROM RAW_DATA");
+            result.AppendLine("WHERE");
+            result.AppendLine("\tRowNumber > @PAGE_SIZE * (@PAGE_NUMBER - 1) AND ");
+            result.AppendLine("\tRowNumber <= @PAGE_SIZE * @PAGE_NUMBER");
+            result.AppendLine("ORDER BY ");
+            result.AppendLine("\tRowNumber");
             return result.ToString();
         }
 

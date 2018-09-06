@@ -19,7 +19,7 @@ namespace StoredProcsGenerator
     [HelpOption]
     public partial class Generator
     {
-        public const string ProcedureKinds = "update|delete|insert";
+        public const string ProcedureKinds = "update|delete|insert|search";
         private readonly IColumnInfoProvider columnInfoProvider;
         private readonly IStoredProcedureGenerator storedProcedureGenerator;
 
@@ -56,10 +56,24 @@ namespace StoredProcsGenerator
         [Option("-r|--rowVersionColumn", CommandOptionType.SingleValue, Description = "Row version column name", ShowInHelpText = true)]
         public string RowVersionColumn { get; } = "";
 
+        [Option("-e|--search_columns", CommandOptionType.SingleValue, Description = "Search columns, separated by |", ShowInHelpText = true)]
+        public string SearchColumns { get; } = "";
+
+        [Option("-o|--order_by_columns", CommandOptionType.SingleValue, Description = "Order by columns, separated by |", ShowInHelpText = true)]
+        public string OrderByColumns { get; } = "";
+
         public async Task<int> OnExecute(CommandLineApplication app, IConsole console)
         {
             if (ProcedureKinds.Contains(Kind.ToLower()))
             {
+                if (Kind.ToLower() == "search")
+                {
+                    if (string.IsNullOrEmpty(SearchColumns) || string.IsNullOrEmpty(OrderByColumns))
+                    {
+                        Console.WriteLine($"Search and order by columns options are required");
+                        return Program.EXCEPTION;
+                    }
+                }
                 Console.WriteLine($"Connecting to server {Server} to database {Database}...");
                 Console.WriteLine($"... to create procedure with prefix of {Prefix} of type {Kind} for table {Table}");
 
@@ -72,7 +86,7 @@ namespace StoredProcsGenerator
                     var kind = (StoredProcedureKind)Enum.Parse(typeof(StoredProcedureKind), Kind, true);
                     var text = new StringBuilder();
                     text.Append(storedProcedureGenerator.GetHeader(kind, Prefix, Table, columns.First().SchemaName, Drop));
-                    text.Append(storedProcedureGenerator.GetBody(kind, columns));
+                    text.Append(storedProcedureGenerator.GetBody(kind, columns, OrderByColumns, SearchColumns));
                     File.WriteAllText(FileName(kind), text.ToString());
                 }
 

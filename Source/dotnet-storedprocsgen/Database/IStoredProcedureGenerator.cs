@@ -6,6 +6,6 @@ namespace StoredProcsGenerator.Database
     {
         string GetHeader(StoredProcedureKind procedureKind, string prefix, string tableName, string schema, bool includeDrop);
         string GetProcedureName(StoredProcedureKind procedureKind, string prefix, string tableName);
-        string GetBody(StoredProcedureKind procedureKind, List<ColumnInfo> columns);
+        string GetBody(StoredProcedureKind procedureKind, List<ColumnInfo> columns, string sortByColumns, string searchColumns);
     }
 }
