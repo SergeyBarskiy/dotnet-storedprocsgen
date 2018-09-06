@@ -16,10 +16,12 @@
     <PackageIconUrl></PackageIconUrl>
     <RepositoryUrl>https://github.com/SergeyBarskiy/dotnet-storedprocsgen</RepositoryUrl>
     <PackageTags>.net core, tool</PackageTags>
-    <PackageReleaseNotes>Initital release</PackageReleaseNotes>
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <PackageReleaseNotes>Initital release
+Implement search</PackageReleaseNotes>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <FileVersion>1.0.0.1</FileVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
