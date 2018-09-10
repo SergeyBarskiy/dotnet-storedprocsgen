@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-storedprocsgen", "do
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "IntegrationTestsDatabase", "IntegrationTestsDatabase\IntegrationTestsDatabase.sqlproj", "{11CD7556-D2FF-4099-8310-BF1691679695}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestProject", "UnitTestProject\UnitTestProject.csproj", "{93772851-4613-4B50-BFAD-D52E60808FDC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{11CD7556-D2FF-4099-8310-BF1691679695}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11CD7556-D2FF-4099-8310-BF1691679695}.Release|Any CPU.Build.0 = Release|Any CPU
 		{11CD7556-D2FF-4099-8310-BF1691679695}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{93772851-4613-4B50-BFAD-D52E60808FDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93772851-4613-4B50-BFAD-D52E60808FDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93772851-4613-4B50-BFAD-D52E60808FDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93772851-4613-4B50-BFAD-D52E60808FDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
