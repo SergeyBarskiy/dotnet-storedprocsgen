@@ -48,6 +48,10 @@ namespace StoredProcsGenerator.Database
             {
                 result.Append(GetSearchParameters());
             }
+            else if (procedureKind == StoredProcedureKind.GetById)
+            {
+                result.Append(GetDeleteStatementParameters(columns));
+            }
             result.AppendLine(")");
             result.AppendLine("AS");
             var firstColumn = columns.First();
@@ -81,6 +85,14 @@ namespace StoredProcsGenerator.Database
             {
                 result.AppendLine(GetSearchRawData(columns, sortByColumns, searchColumns));
                 result.AppendLine(GetSearchFinalSelect());
+            }
+            else if (procedureKind == StoredProcedureKind.GetById) {
+                var primaryColumn = columns.First(c => c.PrimaryKeyColumnPosition == 1);
+                result.Append("SELECT ");
+                result.Append(GetInsertStatementColumnsList(columns));
+                result.AppendLine($" FROM [{firstColumn.SchemaName}].[{firstColumn.TableName}]");
+                result.AppendLine("WHERE");
+                result.AppendLine(GetUpdateStatementWhere(columns));
             }
             return result.ToString();
         }

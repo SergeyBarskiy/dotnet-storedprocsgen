@@ -5,6 +5,7 @@
         Insert,
         Update,
         Delete,
-        Search
+        Search,
+        GetById
     }
 }
