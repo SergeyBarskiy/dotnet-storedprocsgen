@@ -7,6 +7,10 @@ namespace StoredProcsGenerator.Database
 {
     public class StoredProcedureGenerator : IStoredProcedureGenerator
     {
+        private readonly string selectQueryString = "SELECT ";
+        private readonly string whereQueryString = "WHERE";
+        private readonly string fromQueryString = " FROM ";
+        private readonly string orderByQueryString = " ORDER BY ";
         public string GetHeader(StoredProcedureKind procedureKind, string prefix, string tableName, string schema, bool includeDrop)
         {
             var result = new StringBuilder();
@@ -87,12 +91,14 @@ namespace StoredProcsGenerator.Database
                 result.AppendLine(GetSearchFinalSelect());
             }
             else if (procedureKind == StoredProcedureKind.GetById) {
-                var primaryColumn = columns.First(c => c.PrimaryKeyColumnPosition == 1);
-                result.Append("SELECT ");
+                var primaryColumn = columns.First(c => c.PrimaryKeyColumnPosition > 0);
+                result.Append(selectQueryString);
                 result.Append(GetInsertStatementColumnsList(columns));
-                result.AppendLine($" FROM [{firstColumn.SchemaName}].[{firstColumn.TableName}]");
-                result.AppendLine("WHERE");
+                result.AppendLine($"{fromQueryString}[{firstColumn.SchemaName}].[{firstColumn.TableName}]");
+                result.AppendLine(whereQueryString);
                 result.AppendLine(GetUpdateStatementWhere(columns));
+                result.AppendLine(orderByQueryString);
+                result.AppendLine("\tRowNumber");
             }
             return result.ToString();
         }
