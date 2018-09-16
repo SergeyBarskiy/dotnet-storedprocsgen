@@ -1,6 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace UnitTestProject
+namespace StoredProcsGeneratorTests
 {
     [TestClass]
     public class UnitTest1
