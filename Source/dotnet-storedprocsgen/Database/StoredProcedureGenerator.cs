@@ -54,7 +54,7 @@ namespace StoredProcsGenerator.Database
             }
             else if (procedureKind == StoredProcedureKind.GetById)
             {
-                result.Append(GetDeleteStatementParameters(columns));
+                result.Append(GetGetByIdStatementParameters(columns));
             }
             result.AppendLine(")");
             result.AppendLine("AS");
@@ -90,15 +90,17 @@ namespace StoredProcsGenerator.Database
                 result.AppendLine(GetSearchRawData(columns, sortByColumns, searchColumns));
                 result.AppendLine(GetSearchFinalSelect());
             }
-            else if (procedureKind == StoredProcedureKind.GetById) {
-                var primaryColumn = columns.First(c => c.PrimaryKeyColumnPosition > 0);
+            else if (procedureKind == StoredProcedureKind.GetById)
+            {
+                result.AppendLine(@"BEGIN");
+                result.AppendLine(@"SET NOCOUNT ON;");
                 result.Append(selectQueryString);
                 result.Append(GetInsertStatementColumnsList(columns));
                 result.AppendLine($"{fromQueryString}[{firstColumn.SchemaName}].[{firstColumn.TableName}]");
                 result.AppendLine(whereQueryString);
-                result.AppendLine(GetUpdateStatementWhere(columns));
-                result.AppendLine(orderByQueryString);
-                result.AppendLine("\tRowNumber");
+                result.AppendLine(GetGetByIdStatementWhere(columns));
+
+                result.AppendLine(@"END");
             }
             return result.ToString();
         }
@@ -241,6 +243,27 @@ namespace StoredProcsGenerator.Database
             return result.ToString();
         }
 
+
+        private string GetGetByIdStatementParameters(List<ColumnInfo> columns)
+        {
+            var result = new StringBuilder();
+            var keyColumns = columns.Where(c => c.PrimaryKeyColumnPosition > 0).ToList();
+            if (keyColumns.Any())
+            {
+                keyColumns.ForEach(key =>
+                {
+                    var comma = ",";
+                    if (keyColumns.IndexOf(key) == keyColumns.Count - 1)
+                    {
+                        comma = "";
+                    }
+                    result.AppendLine($"@{key.ColumnName} {key.ColumnFullType}{comma}");
+                });
+            }
+
+            return result.ToString();
+        }
+
         private string GetInsertStatementParameters(List<ColumnInfo> columns)
         {
             var result = new StringBuilder();
@@ -343,6 +366,26 @@ namespace StoredProcsGenerator.Database
             return result.ToString();
         }
 
+        private string GetGetByIdStatementWhere(List<ColumnInfo> columns)
+        {
+            var result = new StringBuilder();
+            var keyColumns = columns.Where(c => c.PrimaryKeyColumnPosition > 0).ToList();
+            if (keyColumns.Any())
+            {
+                var and = "AND";
+                keyColumns.ForEach(key =>
+                {
+                    if (keyColumns.IndexOf(key) == keyColumns.Count - 1)
+                    {
+                        and = "";
+                    }
+                    result.AppendLine($"\t[{key.ColumnName}] = @{key.ColumnName} {and} ");
+                });
+            }
+
+            return result.ToString();
+        }
+
         private string GetInsertStatementOutput(List<ColumnInfo> columns)
         {
             var result = new StringBuilder();
@@ -372,6 +415,10 @@ namespace StoredProcsGenerator.Database
         private static List<ColumnInfo> GetFilteredColumnsListForUpdate(List<ColumnInfo> columns)
         {
             return columns.Where(c => !c.Computed).ToList();
+        }
+        private static List<ColumnInfo> GetFilteredColumnsListForGetById(List<ColumnInfo> columns)
+        {
+            return columns.Where(c => !c.IdentityColumn && !c.Computed).ToList();
         }
     }
 }
