@@ -22,7 +22,7 @@ namespace StoredProcsGeneratorTests
         protected string CreateConnectionString()
         {
             var builder = new SqlConnectionStringBuilder();
-            builder.DataSource = "NIMISHA-PC";
+            builder.DataSource = "localhost";
             builder.InitialCatalog = "CodeGenTestDb";
             builder.IntegratedSecurity = true;
             return builder.ConnectionString;
