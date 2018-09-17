@@ -15,6 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\dotnet-storedprocsgen\dotnet-storedprocsgen.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="GeneratedProcs\usp_test_Company_Delete.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

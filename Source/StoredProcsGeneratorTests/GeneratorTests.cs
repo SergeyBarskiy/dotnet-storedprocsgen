@@ -40,12 +40,19 @@ namespace StoredProcsGeneratorTests
             {
                 connection.Open();
                 var command = connection.CreateCommand();
-                command.CommandText = File.ReadAllText(FileName("usp_test_Person_Update.sql"));
+                var deleteQuery = @"IF EXISTS(SELECT * FROM sys.procedures WHERE name = 'usp_test_Person_Update')
+                                BEGIN
+	                            DROP PROCEDURE [dbo].[usp_test_Person_Update]
+                                END";
+                command.CommandText = deleteQuery;
                 command.CommandType = System.Data.CommandType.Text;
-                using (var reader = command.ExecuteReader())
-                {
+                // delete the stored procedure if existing
+                var deleteResult = command.ExecuteNonQuery();
 
-                }
+                // create stored procedure
+                command.CommandText = File.ReadAllText(FileName("usp_test_Person_Update.sql"));
+                var result = command.ExecuteNonQuery();
+
             }
         }
 
