@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0-*",
+
+  "buildOptions": {
+    "copyToOutput": {
+      "include": [
+        "client-secrets.json"
+      ]
+    }
+  },
+
+  "dependencies": {
+    "...",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0"
+  },
+
+  "testRunner": "mstest",
+
+  "frameworks": {
+    "net461": {}
+  }
+}

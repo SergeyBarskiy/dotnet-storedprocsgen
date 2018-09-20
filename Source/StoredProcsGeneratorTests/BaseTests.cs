@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Data.SqlClient;
 using System.IO;
 
@@ -21,9 +22,12 @@ namespace StoredProcsGeneratorTests
 
         protected string CreateConnectionString()
         {
+            var config = new ConfigurationBuilder()
+            .AddJsonFile("appSettings.json")
+            .Build();
             var builder = new SqlConnectionStringBuilder();
-            builder.DataSource = "localhost";
-            builder.InitialCatalog = "CodeGenTestDb";
+            builder.DataSource = config["server"];
+            builder.InitialCatalog = config["database"];
             builder.IntegratedSecurity = true;
             return builder.ConnectionString;
         }
