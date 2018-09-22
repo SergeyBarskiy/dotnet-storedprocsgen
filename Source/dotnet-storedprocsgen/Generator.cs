@@ -19,7 +19,7 @@ namespace StoredProcsGenerator
     [HelpOption]
     public partial class Generator
     {
-        public const string ProcedureKinds = "update|delete|insert|search";
+        public const string ProcedureKinds = "update|delete|insert|search|getbyid";
         private readonly IColumnInfoProvider columnInfoProvider;
         private readonly IStoredProcedureGenerator storedProcedureGenerator;
 

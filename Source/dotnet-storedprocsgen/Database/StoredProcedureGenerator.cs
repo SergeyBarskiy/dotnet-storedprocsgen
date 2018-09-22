@@ -7,6 +7,10 @@ namespace StoredProcsGenerator.Database
 {
     public class StoredProcedureGenerator : IStoredProcedureGenerator
     {
+        private readonly string selectQueryString = "SELECT ";
+        private readonly string whereQueryString = "WHERE";
+        private readonly string fromQueryString = "FROM ";
+        private readonly string orderByQueryString = " ORDER BY ";
         public string GetHeader(StoredProcedureKind procedureKind, string prefix, string tableName, string schema, bool includeDrop)
         {
             var result = new StringBuilder();
@@ -48,6 +52,10 @@ namespace StoredProcsGenerator.Database
             {
                 result.Append(GetSearchParameters());
             }
+            else if (procedureKind == StoredProcedureKind.GetById)
+            {
+                result.Append(GetGetByIdStatementParameters(columns));
+            }
             result.AppendLine(")");
             result.AppendLine("AS");
             var firstColumn = columns.First();
@@ -81,6 +89,18 @@ namespace StoredProcsGenerator.Database
             {
                 result.AppendLine(GetSearchRawData(columns, sortByColumns, searchColumns));
                 result.AppendLine(GetSearchFinalSelect());
+            }
+            else if (procedureKind == StoredProcedureKind.GetById)
+            {
+                result.AppendLine(@"BEGIN");
+                result.AppendLine(@"SET NOCOUNT ON;");
+                result.AppendLine(selectQueryString);
+                result.Append(GetSelectStatementColumnsList(columns));
+                result.AppendLine($"{fromQueryString}[{firstColumn.SchemaName}].[{firstColumn.TableName}]");
+                result.AppendLine(whereQueryString);
+                result.AppendLine(GetGetByIdStatementWhere(columns));
+
+                result.AppendLine(@"END");
             }
             return result.ToString();
         }
@@ -223,6 +243,27 @@ namespace StoredProcsGenerator.Database
             return result.ToString();
         }
 
+
+        private string GetGetByIdStatementParameters(List<ColumnInfo> columns)
+        {
+            var result = new StringBuilder();
+            var keyColumns = columns.Where(c => c.PrimaryKeyColumnPosition > 0).ToList();
+            if (keyColumns.Any())
+            {
+                keyColumns.ForEach(key =>
+                {
+                    var comma = ",";
+                    if (keyColumns.IndexOf(key) == keyColumns.Count - 1)
+                    {
+                        comma = "";
+                    }
+                    result.AppendLine($"\t@{key.ColumnName} {key.ColumnFullType}{comma}");
+                });
+            }
+
+            return result.ToString();
+        }
+
         private string GetInsertStatementParameters(List<ColumnInfo> columns)
         {
             var result = new StringBuilder();
@@ -295,6 +336,22 @@ namespace StoredProcsGenerator.Database
             return result.ToString();
         }
 
+        private string GetSelectStatementColumnsList(List<ColumnInfo> columns)
+        {
+            var result = new StringBuilder();
+            var filteredColumns = columns;
+            filteredColumns.ForEach(column =>
+            {
+                var comma = ",";
+                if (filteredColumns.IndexOf(column) == filteredColumns.Count - 1)
+                {
+                    comma = "";
+                }
+                result.AppendLine($"\t[{column.ColumnName}]{comma}");
+            });
+            return result.ToString();
+        }
+
         private string GetUpdateStatementWhere(List<ColumnInfo> columns)
         {
             var result = new StringBuilder();
@@ -321,6 +378,24 @@ namespace StoredProcsGenerator.Database
                     result.AppendLine($"\t[{key.ColumnName}] = @{key.ColumnName} {and} ");
                 });
             }
+
+            return result.ToString();
+        }
+
+        private string GetGetByIdStatementWhere(List<ColumnInfo> columns)
+        {
+            var result = new StringBuilder();
+            var keyColumns = columns.Where(c => c.PrimaryKeyColumnPosition > 0).ToList();
+
+            var and = "AND";
+            keyColumns.ForEach(key =>
+            {
+                if (keyColumns.IndexOf(key) == keyColumns.Count - 1)
+                {
+                    and = "";
+                }
+                result.AppendLine($"\t[{key.ColumnName}] = @{key.ColumnName} {and} ");
+            });
 
             return result.ToString();
         }
