@@ -13,7 +13,7 @@ Options:
 
   -t|--table             Table name
 
-  -k|--kind              Procedure kind: update|delete|insert|search
+  -k|--kind              Procedure kind: update|delete|insert|search|getbyid
 
   -p|--prefix            Stored procedure prefix
 
