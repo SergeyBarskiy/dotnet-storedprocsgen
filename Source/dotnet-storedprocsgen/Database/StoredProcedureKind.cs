@@ -6,6 +6,7 @@
         Update,
         Delete,
         Search,
-        GetById
+        GetById,
+        GetByParentId
     }
 }

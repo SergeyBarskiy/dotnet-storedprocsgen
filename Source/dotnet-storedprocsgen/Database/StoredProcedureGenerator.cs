@@ -56,6 +56,10 @@ namespace StoredProcsGenerator.Database
             {
                 result.Append(GetGetByIdStatementParameters(columns));
             }
+            else if (procedureKind == StoredProcedureKind.GetByParentId)
+            {
+                result.Append(GetGetByParentIdStatementParameters(columns));
+            }
             result.AppendLine(")");
             result.AppendLine("AS");
             var firstColumn = columns.First();
@@ -99,6 +103,18 @@ namespace StoredProcsGenerator.Database
                 result.AppendLine($"{fromQueryString}[{firstColumn.SchemaName}].[{firstColumn.TableName}]");
                 result.AppendLine(whereQueryString);
                 result.AppendLine(GetGetByIdStatementWhere(columns));
+
+                result.AppendLine(@"END");
+            }
+            else if (procedureKind == StoredProcedureKind.GetByParentId)
+            {
+                result.AppendLine(@"BEGIN");
+                result.AppendLine(@"SET NOCOUNT ON;");
+                result.AppendLine(selectQueryString);
+                result.Append(GetSelectStatementColumnsList(columns));
+                result.AppendLine($"{fromQueryString}[{firstColumn.SchemaName}].[{firstColumn.TableName}]");
+                result.AppendLine(whereQueryString);
+                result.AppendLine(GetGetByParentIdStatementWhere(columns));
 
                 result.AppendLine(@"END");
             }
@@ -264,6 +280,26 @@ namespace StoredProcsGenerator.Database
             return result.ToString();
         }
 
+        private string GetGetByParentIdStatementParameters(IEnumerable<ColumnInfo> columns)
+        {
+            var result = new StringBuilder();
+            var keyColumns = columns.Where(c => c.PrimaryKeyColumnPosition > 0).ToList();
+            if (keyColumns.Any())
+            {
+                keyColumns.ForEach(key =>
+                {
+                    var comma = ",";
+                    if (keyColumns.IndexOf(key) == keyColumns.Count - 1)
+                    {
+                        comma = "";
+                    }
+                    result.AppendLine($"\t@{key.ColumnName} {key.ColumnFullType}{comma}");
+                });
+            }
+
+            return result.ToString();
+        }
+
         private string GetInsertStatementParameters(List<ColumnInfo> columns)
         {
             var result = new StringBuilder();
@@ -386,6 +422,24 @@ namespace StoredProcsGenerator.Database
         {
             var result = new StringBuilder();
             var keyColumns = columns.Where(c => c.PrimaryKeyColumnPosition > 0).ToList();
+
+            var and = "AND";
+            keyColumns.ForEach(key =>
+            {
+                if (keyColumns.IndexOf(key) == keyColumns.Count - 1)
+                {
+                    and = "";
+                }
+                result.AppendLine($"\t[{key.ColumnName}] = @{key.ColumnName} {and} ");
+            });
+
+            return result.ToString();
+        }
+
+        private string GetGetByParentIdStatementWhere(List<ColumnInfo> columns)
+        {
+            var result =new StringBuilder();
+            var keyColumns = columns.Where(c => c.IsParentColumn).ToList();
 
             var and = "AND";
             keyColumns.ForEach(key =>
