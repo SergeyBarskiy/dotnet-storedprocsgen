@@ -9,7 +9,7 @@ namespace StoredProcsGenerator.Database
     {
         private readonly string selectQueryString = "SELECT ";
         private readonly string whereQueryString = "WHERE";
-        private readonly string fromQueryString = " FROM ";
+        private readonly string fromQueryString = "FROM ";
         private readonly string orderByQueryString = " ORDER BY ";
         public string GetHeader(StoredProcedureKind procedureKind, string prefix, string tableName, string schema, bool includeDrop)
         {
@@ -94,8 +94,8 @@ namespace StoredProcsGenerator.Database
             {
                 result.AppendLine(@"BEGIN");
                 result.AppendLine(@"SET NOCOUNT ON;");
-                result.Append(selectQueryString);
-                result.Append(GetInsertStatementColumnsList(columns));
+                result.AppendLine(selectQueryString);
+                result.Append(GetSelectStatementColumnsList(columns));
                 result.AppendLine($"{fromQueryString}[{firstColumn.SchemaName}].[{firstColumn.TableName}]");
                 result.AppendLine(whereQueryString);
                 result.AppendLine(GetGetByIdStatementWhere(columns));
@@ -257,7 +257,7 @@ namespace StoredProcsGenerator.Database
                     {
                         comma = "";
                     }
-                    result.AppendLine($"@{key.ColumnName} {key.ColumnFullType}{comma}");
+                    result.AppendLine($"\t@{key.ColumnName} {key.ColumnFullType}{comma}");
                 });
             }
 
@@ -336,6 +336,22 @@ namespace StoredProcsGenerator.Database
             return result.ToString();
         }
 
+        private string GetSelectStatementColumnsList(List<ColumnInfo> columns)
+        {
+            var result = new StringBuilder();
+            var filteredColumns = columns;
+            filteredColumns.ForEach(column =>
+            {
+                var comma = ",";
+                if (filteredColumns.IndexOf(column) == filteredColumns.Count - 1)
+                {
+                    comma = "";
+                }
+                result.AppendLine($"\t[{column.ColumnName}]{comma}");
+            });
+            return result.ToString();
+        }
+
         private string GetUpdateStatementWhere(List<ColumnInfo> columns)
         {
             var result = new StringBuilder();
@@ -370,18 +386,16 @@ namespace StoredProcsGenerator.Database
         {
             var result = new StringBuilder();
             var keyColumns = columns.Where(c => c.PrimaryKeyColumnPosition > 0).ToList();
-            if (keyColumns.Any())
+
+            var and = "AND";
+            keyColumns.ForEach(key =>
             {
-                var and = "AND";
-                keyColumns.ForEach(key =>
+                if (keyColumns.IndexOf(key) == keyColumns.Count - 1)
                 {
-                    if (keyColumns.IndexOf(key) == keyColumns.Count - 1)
-                    {
-                        and = "";
-                    }
-                    result.AppendLine($"\t[{key.ColumnName}] = @{key.ColumnName} {and} ");
-                });
-            }
+                    and = "";
+                }
+                result.AppendLine($"\t[{key.ColumnName}] = @{key.ColumnName} {and} ");
+            });
 
             return result.ToString();
         }
@@ -415,10 +429,6 @@ namespace StoredProcsGenerator.Database
         private static List<ColumnInfo> GetFilteredColumnsListForUpdate(List<ColumnInfo> columns)
         {
             return columns.Where(c => !c.Computed).ToList();
-        }
-        private static List<ColumnInfo> GetFilteredColumnsListForGetById(List<ColumnInfo> columns)
-        {
-            return columns.Where(c => !c.IdentityColumn && !c.Computed).ToList();
         }
     }
 }
