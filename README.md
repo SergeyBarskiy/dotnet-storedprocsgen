@@ -20,6 +20,8 @@ Options:
   --drop                 Generate drop statement
 
   -r|--rowVersionColumn  Row version column name
+  
+  -pc|--parentColumn	 Parent column name
 
   -e|--search_columns    Search columns, separated by |
 
