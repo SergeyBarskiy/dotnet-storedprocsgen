@@ -283,7 +283,7 @@ namespace StoredProcsGenerator.Database
         private string GetGetByParentIdStatementParameters(IEnumerable<ColumnInfo> columns)
         {
             var result = new StringBuilder();
-            var keyColumns = columns.Where(c => c.PrimaryKeyColumnPosition > 0).ToList();
+            var keyColumns = columns.Where(c => c.IsParentColumn).ToList();
             if (keyColumns.Any())
             {
                 keyColumns.ForEach(key =>
