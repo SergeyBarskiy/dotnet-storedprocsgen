@@ -8,9 +8,9 @@ namespace StoredProcsGenerator.Database
 {
     public class ColumnInfoProvider : IColumnInfoProvider
     {
-        public async Task<List<ColumnInfo>> GetColumns(SqlConnection connection, string tableName, string rowVersionColumn)
+        public async Task<List<ColumnInfo>> GetColumns(SqlConnection connection, string tableName, string rowVersionColumn, string parentColumn = null)
         {
-            var properties = typeof(ColumnInfo).GetProperties().Where(c => !c.Name.ToUpper().Contains("CUSTOM")).ToList();
+            var properties = typeof(ColumnInfo).GetProperties().Where(c => !c.Name.ToUpper().Contains("CUSTOM") && !c.Name.ToUpper().Contains("PARENT")).ToList();
             var result = new List<ColumnInfo>();
             using (var command = connection.CreateCommand())
             {
@@ -35,6 +35,15 @@ namespace StoredProcsGenerator.Database
                 if (column != null)
                 {
                     column.IsCustomRowVersion = true;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(parentColumn))
+            {
+                var column = result.FirstOrDefault(c => c.ColumnName == parentColumn);
+                if (column != null)
+                {
+                    column.IsParentColumn = true;
                 }
             }
             return result;

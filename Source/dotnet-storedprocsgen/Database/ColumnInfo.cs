@@ -21,5 +21,6 @@ namespace StoredProcsGenerator.Database
         public int PrimaryKeyColumnPosition { get; set; }
         public bool IsRowVersion { get; set; }
         public bool IsCustomRowVersion { get; set; }
+        public bool IsParentColumn { get; set; }
     }
 }

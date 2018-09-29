@@ -19,7 +19,7 @@ namespace StoredProcsGenerator
     [HelpOption]
     public partial class Generator
     {
-        public const string ProcedureKinds = "update|delete|insert|search|getbyid";
+        public const string ProcedureKinds = "update|delete|insert|search|getbyid|getbyparentid";
         private readonly IColumnInfoProvider columnInfoProvider;
         private readonly IStoredProcedureGenerator storedProcedureGenerator;
 
@@ -56,6 +56,9 @@ namespace StoredProcsGenerator
         [Option("-r|--rowVersionColumn", CommandOptionType.SingleValue, Description = "Row version column name", ShowInHelpText = true)]
         public string RowVersionColumn { get; } = "";
 
+        [Option("-pc|--parentColumn", CommandOptionType.SingleValue, Description = "Parent column name", ShowInHelpText = true)]
+        public string ParentColumn { get; } = "";
+
         [Option("-e|--search_columns", CommandOptionType.SingleValue, Description = "Search columns, separated by |", ShowInHelpText = true)]
         public string SearchColumns { get; } = "";
 
@@ -81,7 +84,7 @@ namespace StoredProcsGenerator
                 {
                     await connection.OpenAsync();
                     Console.WriteLine("Connected...");
-                    var columns = await columnInfoProvider.GetColumns(connection, Table, RowVersionColumn);
+                    var columns = await columnInfoProvider.GetColumns(connection, Table, RowVersionColumn, ParentColumn);
                     Console.WriteLine($"Total number of columns is {columns.Count}");
                     var kind = (StoredProcedureKind)Enum.Parse(typeof(StoredProcedureKind), Kind, true);
                     var text = new StringBuilder();
