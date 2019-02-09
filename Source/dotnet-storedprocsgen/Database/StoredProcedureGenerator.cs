@@ -65,6 +65,7 @@ namespace StoredProcsGenerator.Database
             var firstColumn = columns.First();
             if (procedureKind == StoredProcedureKind.Insert)
             {
+                result.AppendLine(GetInsertStatementOutputVariableDeclaration(columns));
                 result.Append($"INSERT INTO [{firstColumn.SchemaName}].[{firstColumn.TableName}]");
                 result.AppendLine("(");
                 result.Append(GetInsertStatementColumnsList(columns));
@@ -74,14 +75,17 @@ namespace StoredProcsGenerator.Database
                 result.AppendLine("(");
                 result.Append(GetInsertStatementValues(columns));
                 result.AppendLine(")");
+                result.AppendLine("SELECT * FROM @OUTPUTTABLE");
             }
             else if (procedureKind == StoredProcedureKind.Update)
             {
+                result.AppendLine(GetInsertStatementOutputVariableDeclaration(columns));
                 result.AppendLine($"UPDATE [{firstColumn.SchemaName}].[{firstColumn.TableName}] SET");
                 result.Append(GetUpdateStatementColumnsList(columns));
                 result.AppendLine(GetInsertStatementOutput(columns));
                 result.AppendLine("WHERE");
                 result.AppendLine(GetUpdateStatementWhere(columns));
+                result.AppendLine("SELECT * FROM @OUTPUTTABLE");
             }
             else if (procedureKind == StoredProcedureKind.Delete)
             {
@@ -461,18 +465,39 @@ namespace StoredProcsGenerator.Database
             var timeStamp = columns.FirstOrDefault(c => c.IsRowVersion || c.IsCustomRowVersion);
             if (identity != null && timeStamp != null)
             {
-                result.Append($"OUTPUT inserted.[{identity.ColumnName}], inserted.[{timeStamp.ColumnName}]");
+                result.Append($"OUTPUT inserted.[{identity.ColumnName}], inserted.[{timeStamp.ColumnName}] INTO @OUTPUTTABLE");
             }
             else if (identity != null)
             {
-                result.Append($"OUTPUT inserted.[{identity.ColumnName}]");
+                result.Append($"OUTPUT inserted.[{identity.ColumnName}] INTO @OUTPUTTABLE");
             }
             else if (timeStamp != null)
             {
-                result.Append($"OUTPUT inserted.[{timeStamp.ColumnName}]");
+                result.Append($"OUTPUT inserted.[{timeStamp.ColumnName}] INTO @OUTPUTTABLE");
             }
             return result.ToString();
         }
+
+        private string GetInsertStatementOutputVariableDeclaration(List<ColumnInfo> columns)
+        {
+            var result = new StringBuilder();
+            var identity = columns.FirstOrDefault(c => c.IdentityColumn);
+            var timeStamp = columns.FirstOrDefault(c => c.IsRowVersion || c.IsCustomRowVersion);
+            if (identity != null && timeStamp != null)
+            {
+                result.Append($"DECLARE @OUTPUTTABLE as TABLE([{identity.ColumnName}] {identity.TypeName}, [{timeStamp.ColumnName}] {(timeStamp.TypeName.ToLower() == "timestamp" ? "binary(8)" : timeStamp.TypeName)})");
+            }
+            else if (identity != null)
+            {
+                result.Append($"DECLARE @OUTPUTTABLE as TABLE([{identity.ColumnName}] {identity.TypeName})");
+            }
+            else if (timeStamp != null)
+            {
+                result.Append($"DECLARE @OUTPUTTABLE as TABLE([{timeStamp.ColumnName}]  {(timeStamp.TypeName.ToLower() == "timestamp" ? "binary(8)" : timeStamp.TypeName)})");
+            }
+            return result.ToString();
+        }
+
 
 
         private static List<ColumnInfo> GetFilteredColumnsListForInsert(List<ColumnInfo> columns)
