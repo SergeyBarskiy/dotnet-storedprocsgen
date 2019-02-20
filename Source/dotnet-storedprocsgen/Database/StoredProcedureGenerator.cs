@@ -11,10 +11,10 @@ namespace StoredProcsGenerator.Database
         private readonly string whereQueryString = "WHERE";
         private readonly string fromQueryString = "FROM ";
         private readonly string orderByQueryString = " ORDER BY ";
-        public string GetHeader(StoredProcedureKind procedureKind, string prefix, string tableName, string schema, bool includeDrop)
+        public string GetHeader(StoredProcedureKind procedureKind, string prefix, string tableName, string schema, bool includeDrop, bool uppercaseName)
         {
             var result = new StringBuilder();
-            string fullName = GetProcedureName(procedureKind, prefix, tableName);
+            string fullName = GetProcedureName(procedureKind, prefix, tableName, uppercaseName);
             if (includeDrop)
             {
                 result.AppendLine($"IF EXISTS(SELECT * FROM sys.procedures WHERE name = '{fullName}')");
@@ -27,9 +27,14 @@ namespace StoredProcsGenerator.Database
             return result.ToString();
         }
 
-        public string GetProcedureName(StoredProcedureKind procedureKind, string prefix, string tableName)
+        public string GetProcedureName(StoredProcedureKind procedureKind, string prefix, string tableName, bool uppercaseName)
         {
-            return $"{prefix}_{tableName}_{procedureKind}"; ;
+            var result =  $"{prefix}_{tableName}_{procedureKind}";
+            if (uppercaseName)
+            {
+                result = result.ToUpper();
+            }
+            return result;
         }
 
         public string GetBody(StoredProcedureKind procedureKind, List<ColumnInfo> columns, string sortByColumns, string searchColumns)
@@ -75,7 +80,10 @@ namespace StoredProcsGenerator.Database
                 result.AppendLine("(");
                 result.Append(GetInsertStatementValues(columns));
                 result.AppendLine(")");
-                result.AppendLine("SELECT * FROM @OUTPUTTABLE");
+                if (columns.Any(c => c.IsRowVersion || c.IsCustomRowVersion || c.IdentityColumn))
+                {
+                    result.AppendLine("SELECT * FROM @OUTPUTTABLE");
+                }
             }
             else if (procedureKind == StoredProcedureKind.Update)
             {
@@ -85,7 +93,10 @@ namespace StoredProcsGenerator.Database
                 result.AppendLine(GetInsertStatementOutput(columns));
                 result.AppendLine("WHERE");
                 result.AppendLine(GetUpdateStatementWhere(columns));
-                result.AppendLine("SELECT * FROM @OUTPUTTABLE");
+                if (columns.Any(c => c.IsRowVersion || c.IsCustomRowVersion || c.IdentityColumn))
+                {
+                    result.AppendLine("SELECT * FROM @OUTPUTTABLE");
+                }
             }
             else if (procedureKind == StoredProcedureKind.Delete)
             {

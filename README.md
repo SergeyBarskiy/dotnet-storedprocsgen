@@ -26,6 +26,8 @@ Options:
   -e|--search_columns    Search columns, separated by |
 
   -o|--order_by_columns  Order by columns, separated by |
+  
+  --upper                Uppercase procedure name
 
 
 This tool generates stored procedures.  Use -s to specify server name and -d for the database name.
