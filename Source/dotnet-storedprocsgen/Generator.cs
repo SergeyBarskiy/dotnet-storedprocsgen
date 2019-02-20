@@ -65,6 +65,9 @@ namespace StoredProcsGenerator
         [Option("-o|--order_by_columns", CommandOptionType.SingleValue, Description = "Order by columns, separated by |", ShowInHelpText = true)]
         public string OrderByColumns { get; } = "";
 
+        [Option("--upper", CommandOptionType.NoValue, Description = "Uppercase procedure name", ShowInHelpText = true)]
+        public bool UppercaseName { get; } = false;
+
         public async Task<int> OnExecute(CommandLineApplication app, IConsole console)
         {
             if (ProcedureKinds.Contains(Kind.ToLower()))
@@ -88,9 +91,9 @@ namespace StoredProcsGenerator
                     Console.WriteLine($"Total number of columns is {columns.Count}");
                     var kind = (StoredProcedureKind)Enum.Parse(typeof(StoredProcedureKind), Kind, true);
                     var text = new StringBuilder();
-                    text.Append(storedProcedureGenerator.GetHeader(kind, Prefix, Table, columns.First().SchemaName, Drop));
+                    text.Append(storedProcedureGenerator.GetHeader(kind, Prefix, Table, columns.First().SchemaName, Drop, UppercaseName));
                     text.Append(storedProcedureGenerator.GetBody(kind, columns, OrderByColumns, SearchColumns));
-                    File.WriteAllText(FileName(kind), text.ToString());
+                    File.WriteAllText(FileName(kind, UppercaseName), text.ToString());
                 }
 
                 return Program.OK;
@@ -113,9 +116,9 @@ namespace StoredProcsGenerator
             return new SqlConnection(CreateConnectionString());
         }
 
-        public string FileName(StoredProcedureKind kind)
+        public string FileName(StoredProcedureKind kind, bool uppercaseName)
         {
-            return Path.Combine(Environment.CurrentDirectory, storedProcedureGenerator.GetProcedureName(kind, Prefix, Table) + ".sql");
+            return Path.Combine(Environment.CurrentDirectory, storedProcedureGenerator.GetProcedureName(kind, Prefix, Table, uppercaseName) + ".sql");
         }
     }
 }
