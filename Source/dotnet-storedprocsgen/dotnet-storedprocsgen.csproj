@@ -19,12 +19,13 @@
     <PackageReleaseNotes>1.0 Initital release
 1.1 Implement search
 1.2 Implement Get by Id
+1.3 Implement Get by parent id
 1.4 Change procedures to user output into to support triggers on that tables
-1.3 Implement Get by parent id</PackageReleaseNotes>
-    <AssemblyVersion>1.4.0.0</AssemblyVersion>
+1.5 Implement upper casing of procedure names</PackageReleaseNotes>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <FileVersion>1.4.0.0</FileVersion>
-    <Version>1.4.0</Version>
+    <FileVersion>1.5.0.0</FileVersion>
+    <Version>1.5.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
