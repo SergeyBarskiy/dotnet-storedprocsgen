@@ -29,7 +29,7 @@ namespace StoredProcsGenerator.Database
 
         public string GetProcedureName(StoredProcedureKind procedureKind, string prefix, string tableName, bool uppercaseName)
         {
-            var result =  $"{prefix}_{tableName}_{procedureKind}";
+            var result = $"{prefix}_{tableName}_{procedureKind}";
             if (uppercaseName)
             {
                 result = result.ToUpper();
@@ -206,7 +206,7 @@ namespace StoredProcsGenerator.Database
         private string GetSearchParameters()
         {
             var result = new StringBuilder();
-            result.AppendLine("\t@SEARCH AS NVARCHAR(10) = '',");
+            result.AppendLine("\t@SEARCH AS NVARCHAR(MAX) = '',");
             result.AppendLine("\t@PAGE_NUMBER AS INT = 1,");
             result.AppendLine("\t@PAGE_SIZE AS INT = 10,");
             result.AppendLine("\t@IS_ASCENDING AS BIT = 1");
@@ -366,7 +366,7 @@ namespace StoredProcsGenerator.Database
         private string GetUpdateStatementColumnsList(List<ColumnInfo> columns)
         {
             var result = new StringBuilder();
-            var filteredColumns = GetFilteredColumnsListForInsert(columns);
+            var filteredColumns = GetFilteredColumnsListForUpdateColumnList(columns);
             filteredColumns.ForEach(column =>
             {
                 var comma = ",";
@@ -453,7 +453,7 @@ namespace StoredProcsGenerator.Database
 
         private string GetGetByParentIdStatementWhere(List<ColumnInfo> columns)
         {
-            var result =new StringBuilder();
+            var result = new StringBuilder();
             var keyColumns = columns.Where(c => c.IsParentColumn).ToList();
 
             var and = "AND";
@@ -520,5 +520,11 @@ namespace StoredProcsGenerator.Database
         {
             return columns.Where(c => !c.Computed).ToList();
         }
+
+        private static List<ColumnInfo> GetFilteredColumnsListForUpdateColumnList(List<ColumnInfo> columns)
+        {
+            return columns.Where(c => !c.IdentityColumn && !c.Computed && !c.IsRowVersion && c.PrimaryKeyColumnPosition <= 0).ToList();
+        }
+
     }
 }
