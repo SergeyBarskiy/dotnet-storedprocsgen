@@ -55,7 +55,8 @@ Select
 	sys.columns.name As ColumnName, 
 	sys.schemas.name As SchemaName,
 	sys.types.name As TypeName,
-	sys.columns.max_length As MaximumLength,
+	Cast(Case When sys.types.name LIKE '%CHAR' AND sys.columns.max_length > 0 AND sys.types.name LIKE 'N%' Then sys.columns.max_length/2.0 Else sys.columns.max_length End  As int) As MaximumLength,
+	sys.columns.max_length As RawMaximumLength,
 	sys.columns.precision As ColumnPrecision,
 	sys.columns.scale As ColumnScale,
 	sys.columns.column_id As OrdinalPosition,
@@ -63,7 +64,8 @@ Select
 	Case
 		When sys.types.name LIKE '%TEXT' OR sys.types.name IN ('IMAGE', 'SQL_VARIANT' ,'XML') Then ''
 		When sys.types.name LIKE '%CHAR' AND sys.columns.max_length = -1 Then '(MAX)'
-		When sys.types.name LIKE '%CHAR' AND sys.columns.max_length > -1 Then '(' + CAST(sys.columns.max_length As nvarchar(11)) + ')'
+		When sys.types.name LIKE '%CHAR' AND sys.columns.max_length > - 1 AND sys.types.name NOT LIKE 'N%' Then '(' + CAST(sys.columns.max_length As nvarchar(11)) + ')'
+		When sys.types.name LIKE '%CHAR' AND sys.columns.max_length > - 1 AND sys.types.name LIKE 'N%'  Then '(' + CAST(CAST(sys.columns.max_length / 2.0 As Int) As nvarchar(11)) + ')'
 		When sys.types.name LIKE '%BINARY' AND sys.columns.max_length = -1 Then '(MAX)'
 		When sys.types.name LIKE '%BINARY' AND sys.columns.max_length > -1 Then  '(' + CAST(sys.columns.max_length As nvarchar(11)) + ')'
 		When sys.types.name IN ('DECIMAL', 'NUMERIC') Then  '(' + CAST(sys.columns.precision AS nvarchar(11)) + ',' + CAST(sys.columns.scale As nvarchar(11)) + ')'
