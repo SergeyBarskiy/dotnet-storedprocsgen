@@ -9,7 +9,7 @@ Options:
 
   -s|--server            Server name
 
-  -d|--database          Database name
+  --database             Database name
 
   -t|--table             Table name
 
