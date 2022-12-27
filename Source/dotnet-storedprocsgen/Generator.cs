@@ -108,6 +108,7 @@ namespace StoredProcsGenerator
             builder.DataSource = Server;
             builder.InitialCatalog = Database;
             builder.IntegratedSecurity = true;
+            builder.Encrypt= false;
             return builder.ConnectionString;
         }
 
