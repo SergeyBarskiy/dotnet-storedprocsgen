@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     <PackAsTool>true</PackAsTool>
     <IsPackable>true</IsPackable>
     <LangVersion>7.1</LangVersion>
@@ -23,11 +23,13 @@
 1.4 Change procedures to user output into to support triggers on that tables
 1.5 Implement upper casing of procedure names
 1.6 Address issue with updating primary key inside update procedure.  Update paramter size for search procedures
-1.7 Address issue with nvarchar paramters were generated with double the size</PackageReleaseNotes>
-    <AssemblyVersion>1.7.0.0</AssemblyVersion>
+1.7 Address issue with nvarchar paramters were generated with double the size
+1.8 Update Dotnet version
+	</PackageReleaseNotes>
+    <AssemblyVersion>1.8.0.0</AssemblyVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <FileVersion>1.7.0.0</FileVersion>
-    <Version>1.7.0</Version>
+    <FileVersion>1.8.0.0</FileVersion>
+    <Version>1.8.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
