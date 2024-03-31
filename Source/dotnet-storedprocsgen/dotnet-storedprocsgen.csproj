@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
     <PackAsTool>true</PackAsTool>
     <IsPackable>true</IsPackable>
     <LangVersion>7.1</LangVersion>
@@ -27,18 +27,19 @@
 1.8 Update Dotnet version
 1.9 Update nugets
 2.0 Update doc.  -d paramter does not work in latest dotnet tool.  Use --database
+2.1 Security update and .net 8 adoption
 	</PackageReleaseNotes>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <AssemblyVersion>2.1.0.0</AssemblyVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <FileVersion>2.0.0.0</FileVersion>
+    <FileVersion>2.1.0.0</FileVersion>
     <Version>2.0.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.0.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
   </ItemGroup>
 
 </Project>
