@@ -10,7 +10,6 @@ namespace StoredProcsGenerator.Database
         private readonly string selectQueryString = "SELECT ";
         private readonly string whereQueryString = "WHERE";
         private readonly string fromQueryString = "FROM ";
-        private readonly string orderByQueryString = " ORDER BY ";
         public string GetHeader(StoredProcedureKind procedureKind, string prefix, string tableName, string schema, bool includeDrop, bool uppercaseName)
         {
             var result = new StringBuilder();
