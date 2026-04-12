@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +8,7 @@ namespace StoredProcsGenerator.Database
 {
     public class ColumnInfoProvider : IColumnInfoProvider
     {
-        public async Task<List<ColumnInfo>> GetColumns(SqlConnection connection, string tableName, string rowVersionColumn, string parentColumn = null, string schemaName = null)
+        public async Task<List<ColumnInfo>> GetColumns(SqlConnection connection, string tableName, string rowVersionColumn, string parentColumn = null)
         {
             var properties = typeof(ColumnInfo).GetProperties().Where(c => !c.Name.ToUpper().Contains("CUSTOM") && !c.Name.ToUpper().Contains("PARENT")).ToList();
             var result = new List<ColumnInfo>();
@@ -17,9 +16,6 @@ namespace StoredProcsGenerator.Database
             {
                 command.CommandText = ColumnsSelectStatement;
                 command.Parameters.AddWithValue("@tableName", tableName);
-                command.Parameters.Add("@schemaName", SqlDbType.NVarChar, 128).Value = string.IsNullOrWhiteSpace(schemaName)
-                    ? (object)DBNull.Value
-                    : schemaName;
                 using (var reader = await command.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
@@ -90,7 +86,6 @@ Inner Join sys.tables On sys.tables.object_id = sys.columns.object_id
 Inner Join sys.schemas On sys.schemas.schema_id = sys.tables.schema_id
 Inner Join sys.types On sys.types.user_type_id = sys.columns.user_type_id
 Where sys.tables.name=@tableName
-    And (@schemaName Is Null Or sys.schemas.name=@schemaName)
 Order By sys.columns.column_id
 ";
     }

@@ -6,6 +6,6 @@ namespace StoredProcsGenerator.Database
 {
     public interface IColumnInfoProvider
     {
-        Task<List<ColumnInfo>> GetColumns(SqlConnection connection, string tableName, string rowVersionColumn, string parentColumn = null, string schemaName = null);
+        Task<List<ColumnInfo>> GetColumns(SqlConnection connection, string tableName, string rowVersionColumn, string parentColumn = null);
     }
 }
