@@ -90,10 +90,10 @@ namespace StoredProcsGenerator
                 {
                     await connection.OpenAsync();
                     Console.WriteLine("Connected...");
-                    var columns = await columnInfoProvider.GetColumns(connection, Table, RowVersionColumn, ParentColumn, Schema);
+                    var columns = await columnInfoProvider.GetColumns(connection, Table, RowVersionColumn, ParentColumn);
                     if (!columns.Any())
                     {
-                        Console.WriteLine($"No columns found for table {Table}{(string.IsNullOrWhiteSpace(Schema) ? "" : $" in schema {Schema}")}");
+                        Console.WriteLine($"No columns found for table {Table}");
                         return Program.EXCEPTION;
                     }
 
