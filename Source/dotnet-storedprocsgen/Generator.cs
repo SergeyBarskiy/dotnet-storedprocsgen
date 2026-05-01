@@ -15,7 +15,7 @@ namespace StoredProcsGenerator
            Name = "dotnet storedprocsgen",
            FullName = "dotnet-storedprocsgen",
            Description = "Generates stored procedures",
-           ExtendedHelpText = "This tool generates stored procedures.  Use -s to specify server name and -d for the database name.  SSPI will be used.")]
+           ExtendedHelpText = "This tool generates stored procedures.  Use -s to specify server name, -d for the database name, and optionally --schema to target a specific schema.  SSPI will be used.")]
     [HelpOption]
     public partial class Generator
     {
@@ -42,6 +42,9 @@ namespace StoredProcsGenerator
         [Required(ErrorMessage = "You must specify table name / -t or --table option")]
         [Option("-t|--table", CommandOptionType.SingleValue, Description = "Table name", ShowInHelpText = true)]
         public string Table { get; }
+
+        [Option("-sc|--schema", CommandOptionType.SingleValue, Description = "Schema name", ShowInHelpText = true)]
+        public string Schema { get; } = "";
 
         [Required(ErrorMessage = "You must specify procedure kind / -k or --kind option")]
         [Option("-k|--kind", CommandOptionType.SingleValue, Description = "Procedure kind: " + ProcedureKinds, ShowInHelpText = true)]
@@ -88,10 +91,17 @@ namespace StoredProcsGenerator
                     await connection.OpenAsync();
                     Console.WriteLine("Connected...");
                     var columns = await columnInfoProvider.GetColumns(connection, Table, RowVersionColumn, ParentColumn);
+                    if (!columns.Any())
+                    {
+                        Console.WriteLine($"No columns found for table {Table}");
+                        return Program.EXCEPTION;
+                    }
+
+                    var schema = string.IsNullOrWhiteSpace(Schema) ? columns.First().SchemaName : Schema;
                     Console.WriteLine($"Total number of columns is {columns.Count}");
                     var kind = (StoredProcedureKind)Enum.Parse(typeof(StoredProcedureKind), Kind, true);
                     var text = new StringBuilder();
-                    text.Append(storedProcedureGenerator.GetHeader(kind, Prefix, Table, columns.First().SchemaName, Drop, UppercaseName));
+                    text.Append(storedProcedureGenerator.GetHeader(kind, Prefix, Table, schema, Drop, UppercaseName));
                     text.Append(storedProcedureGenerator.GetBody(kind, columns, OrderByColumns, SearchColumns));
                     File.WriteAllText(FileName(kind, UppercaseName), text.ToString());
                 }
