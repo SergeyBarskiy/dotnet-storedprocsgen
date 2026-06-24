@@ -145,7 +145,7 @@ namespace StoredProcsGenerator.Database
             var finalOrderBy = "";
             sorts.ForEach(s =>
             {
-                finalOrderBy = finalOrderBy + $"[{s}]";
+                finalOrderBy = finalOrderBy + GetQualifiedColumnName(s, columns, firstColumn);
                 if (sorts.IndexOf(s) != sorts.Count - 1)
                 {
                     finalOrderBy = finalOrderBy + ", ";
@@ -155,7 +155,7 @@ namespace StoredProcsGenerator.Database
             var finalOrderByDescending = "";
             sorts.ForEach(s =>
             {
-                finalOrderByDescending = finalOrderByDescending + $"[{s}] DESC";
+                finalOrderByDescending = finalOrderByDescending + GetQualifiedColumnName(s, columns, firstColumn) + " DESC";
                 if (sorts.IndexOf(s) != sorts.Count - 1)
                 {
                     finalOrderByDescending = finalOrderByDescending + ", ";
@@ -165,7 +165,7 @@ namespace StoredProcsGenerator.Database
             var finalSearch = "";
             searches.ForEach(s =>
             {
-                finalSearch = finalSearch + $"([{s}] LIKE '%'+ @SEARCH +'%')";
+                finalSearch = finalSearch + $"({GetQualifiedColumnName(s, columns, firstColumn)} LIKE '%'+ @SEARCH +'%')";
                 if (searches.IndexOf(s) != searches.Count - 1)
                 {
                     finalSearch = finalSearch + " OR ";
@@ -187,7 +187,7 @@ namespace StoredProcsGenerator.Database
             result.AppendLine("\tSELECT");
             selectable.ForEach(column =>
             {
-                result.AppendLine($"\t\t[{column}],");
+                result.AppendLine($"\t\t{GetQualifiedColumnName(column, columns, firstColumn)},");
             });
             result.AppendLine("\t\tCASE @IS_ASCENDING WHEN 1 THEN");
             result.AppendLine($"\t\t\tROW_NUMBER() OVER(ORDER BY {finalOrderBy})");
@@ -397,9 +397,24 @@ namespace StoredProcsGenerator.Database
                 {
                     comma = "";
                 }
-                result.AppendLine($"\t[{column.ColumnName}]{comma}");
+                result.AppendLine($"\t[{column.SchemaName}].[{column.TableName}].[{column.ColumnName}]{comma}");
             });
             return result.ToString();
+        }
+
+        private string GetQualifiedColumnName(string columnName, List<ColumnInfo> columns, ColumnInfo firstColumn = null)
+        {
+            if (string.IsNullOrWhiteSpace(columnName)) return columnName;
+            var info = columns.FirstOrDefault(c => string.Equals(c.ColumnName, columnName, StringComparison.OrdinalIgnoreCase));
+            if (info != null)
+            {
+                return $"[{info.SchemaName}].[{info.TableName}].[{info.ColumnName}]";
+            }
+            if (firstColumn != null)
+            {
+                return $"[{firstColumn.SchemaName}].[{firstColumn.TableName}].[{columnName}]";
+            }
+            return $"[{columnName}]";
         }
 
         private string GetUpdateStatementWhere(List<ColumnInfo> columns)
@@ -411,9 +426,9 @@ namespace StoredProcsGenerator.Database
             {
                 keyColumns.ForEach(key =>
                 {
-                    result.AppendLine($"\t[{key.ColumnName}] = @{key.ColumnName} AND ");
+                    result.AppendLine($"\t[{key.SchemaName}].[{key.TableName}].[{key.ColumnName}] = @{key.ColumnName} AND ");
                 });
-                result.AppendLine($"\t[{timeStamp.ColumnName}]= @{timeStamp.ColumnName}");
+                result.AppendLine($"\t[{timeStamp.SchemaName}].[{timeStamp.TableName}].[{timeStamp.ColumnName}] = @{timeStamp.ColumnName}");
 
             }
             else if (keyColumns.Any())
@@ -425,7 +440,7 @@ namespace StoredProcsGenerator.Database
                     {
                         and = "";
                     }
-                    result.AppendLine($"\t[{key.ColumnName}] = @{key.ColumnName} {and} ");
+                    result.AppendLine($"\t[{key.SchemaName}].[{key.TableName}].[{key.ColumnName}] = @{key.ColumnName} {and} ");
                 });
             }
 
@@ -444,7 +459,7 @@ namespace StoredProcsGenerator.Database
                 {
                     and = "";
                 }
-                result.AppendLine($"\t[{key.ColumnName}] = @{key.ColumnName} {and} ");
+                result.AppendLine($"\t[{key.SchemaName}].[{key.TableName}].[{key.ColumnName}] = @{key.ColumnName} {and} ");
             });
 
             return result.ToString();
@@ -462,7 +477,7 @@ namespace StoredProcsGenerator.Database
                 {
                     and = "";
                 }
-                result.AppendLine($"\t[{key.ColumnName}] = @{key.ColumnName} {and} ");
+                result.AppendLine($"\t[{key.SchemaName}].[{key.TableName}].[{key.ColumnName}] = @{key.ColumnName} {and} ");
             });
 
             return result.ToString();

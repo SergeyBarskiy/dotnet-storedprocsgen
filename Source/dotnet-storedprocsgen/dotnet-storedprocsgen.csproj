@@ -29,11 +29,13 @@
 1.9 Update nugets
 2.0 Update doc.  -d paramter does not work in latest dotnet tool.  Use --database
 2.1 Security update and .net 8 adoption
+10.0 Update to .net 10 and latest nugets and add support to procedures schema name
+10.1 Fully qualify columns and tables with schema name.
 	</PackageReleaseNotes>
-    <AssemblyVersion>10.0.1.0</AssemblyVersion>
+    <AssemblyVersion>10.1.0.0</AssemblyVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <FileVersion>10.0.1.0</FileVersion>
-    <Version>10.0.1</Version>
+    <FileVersion>10.1.0.0</FileVersion>
+    <Version>10.1.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
