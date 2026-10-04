@@ -15,6 +15,10 @@ jobs:
       MAIN_PROJECT: 'dotnet-storedprocsgen.csproj'
     
     runs-on: ubuntu-latest
+    
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v2
